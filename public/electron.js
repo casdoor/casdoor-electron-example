@@ -71,7 +71,7 @@ ipcMain.handle("focusWin", (event, ...args) => {
 });
 
 ipcMain.handle(
-  "getAccesstoken",
+  "getUserInfo",
   async (event, clientId, clientSecret, code) => {
     const { data } = await axios({
       method: "post",

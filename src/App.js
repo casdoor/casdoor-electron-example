@@ -1,23 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import SDK from "casdoor-js-sdk";
+import { useState } from "react";
+import "./App.css";
+
+const { shell, ipcRenderer } = window?.electron;
+
+const serverUrl = "http://localhost:7001";
+const appName = "app-built-in";
+const organizationName = "built-in";
+const redirectPath = "/callback";
+const clientId = "";
+const clientSecret = "";
+
+const redirectUrl = "http://localhost:3000" + redirectPath;
+const sdkConfig = {
+  serverUrl,
+  clientId,
+  appName,
+  organizationName,
+  redirectPath,
+};
+const sdk = new SDK(sdkConfig);
 
 function App() {
+  const [userInfo, setUserInfo] = useState();
+
+  async function startAuth() {
+    shell.openExternal(sdk.getSigninUrl());
+    const { code } = await ipcRenderer.invoke("waitCallback", redirectUrl);
+    const userInfo = await ipcRenderer.invoke(
+      "getUserInfo",
+      clientId,
+      clientSecret,
+      code
+    );
+    ipcRenderer.invoke("focusWin");
+
+    setUserInfo(userInfo);
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {userInfo ? (
+        `Username: ${userInfo.username}`
+      ) : (
+        <button onClick={startAuth}>Login with Casdoor</button>
+      )}
     </div>
   );
 }
