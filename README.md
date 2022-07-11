@@ -22,6 +22,6 @@ The first five parameters are parameters of [casdoor-js-sdk](https://github.com/
 
 In the project directory, you can run:
 
-### `npm run dev`
+### `npm run dev` or `yarn dev`
 
 Builds the electron app and run this app.
