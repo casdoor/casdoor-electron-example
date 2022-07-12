@@ -6,17 +6,19 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 You need to init requires 7 parameters, which are all string type:
 
-| Name                 | Must | Description                                                                                      | Path                   |
-| -------------------- | ---- | ------------------------------------------------------------------------------------------------ | ---------------------- |
-| serverUrl            | Yes  | your Casdoor server URL                                                                          | `src/App.js`         |
-| clientId             | Yes  | the Client ID of your Casdoor application                                                        | `src/App.js`         |
-| appName              | Yes  | the name of your Casdoor application                                                             | `src/App.js`         |
-| organizationName     | Yes  | the name of the Casdoor organization connected with your Casdoor application                     | `src/App.js`         |
-| redirectPath         | No   | the path of the redirect URL for your Casdoor application, will be `/callback` if not provided | `src/App.js`         |
-| clientSecret         | Yes  | the Client Secret of your Casdoor application                                                   | `src/App.js`         |
-| casdoorServiceDomain | Yes  | your Casdoor server URL                                                                          | `public/electron.js` |
+| Name                 | Description                                                                                      | Path                   |
+| -------------------- | ------------------------------------------------------------------------------------------------ | ---------------------- |
+| serverUrl            | your Casdoor server URL                                                                          | `src/App.js`         |
+| clientId             | the Client ID of your Casdoor application                                                        | `src/App.js`         |
+| appName              | the name of your Casdoor application                                                             | `src/App.js`         |
+| organizationName     | the name of the Casdoor organization connected with your Casdoor application                     | `src/App.js`         |
+| redirectPath         | the path of the redirect URL for your Casdoor application, will be `/callback` if not provided | `src/App.js`         |
+| clientSecret         | the Client Secret of your Casdoor application                                                   | `src/App.js`         |
+| casdoorServiceDomain | your Casdoor server URL                                                                          | `public/electron.js` |
 
 The first five parameters are parameters of [casdoor-js-sdk](https://github.com/casdoor/casdoor-js-sdk).
+
+If you don't set these parameters, this project will use the  [Casdoor online demo]( https://door.casdoor.com) as the defult Casdoor server and use the [Casnode](https://door.casdoor.com/applications/app-casnode) as the default Casdoor application.
 
 ## Available Scripts
 
