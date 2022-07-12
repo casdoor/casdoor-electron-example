@@ -5,7 +5,7 @@ const axios = require("axios");
 const { app, BrowserWindow, ipcMain } = require("electron");
 const isDev = require("electron-is-dev");
 
-const casdoorServiceDomain = "http://localhost:7001";
+const casdoorServiceDomain = "https://door.casdoor.com";
 const authCodeUrl = casdoorServiceDomain + "/api/login/oauth/access_token";
 const getUserInfoUrl = casdoorServiceDomain + "/api/login/oauth/introspect";
 

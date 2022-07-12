@@ -4,12 +4,12 @@ import "./App.css";
 
 const { shell, ipcRenderer } = window?.electron;
 
-const serverUrl = "http://localhost:7001";
-const appName = "app-built-in";
-const organizationName = "built-in";
+const serverUrl = "https://door.casdoor.com";
+const appName = "app-casnode";
+const organizationName = "casbin";
 const redirectPath = "/callback";
-const clientId = "";
-const clientSecret = "";
+const clientId = "014ae4bd048734ca2dea";
+const clientSecret = "f26a4115725867b7bb7b668c81e1f8f7fae1544d";
 
 const redirectUrl = "http://localhost:3000" + redirectPath;
 const sdkConfig = {
