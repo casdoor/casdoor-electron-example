@@ -4,10 +4,14 @@ const url = require("url");
 const axios = require("axios");
 const { app, BrowserWindow, ipcMain } = require("electron");
 const isDev = require("electron-is-dev");
+const Store = require('electron-store');
 
 const casdoorServiceDomain = "https://door.casdoor.com";
 const authCodeUrl = casdoorServiceDomain + "/api/login/oauth/access_token";
 const getUserInfoUrl = casdoorServiceDomain + "/api/login/oauth/introspect";
+
+const store = new Store();
+Store.initRenderer();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -102,3 +106,15 @@ ipcMain.handle(
     return resp.data;
   }
 );
+
+ipcMain.handle("setStore", (event, key, data) => {
+  store.set(key, data);
+});
+
+ipcMain.handle("getStore", (event, key) => {
+  store.get(key);
+});
+
+ipcMain.handle("deleteStore", (event, key) => {
+  store.delete(key);
+});
