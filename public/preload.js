@@ -4,4 +4,5 @@ contextBridge.exposeInMainWorld("electron", {
   ipcRenderer,
   remote,
   shell,
+  receiveCode: (handler) => ipcRenderer.on('receiveCode', (event, ...args) => handler(...args)),
 });

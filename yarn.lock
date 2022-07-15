@@ -3005,11 +3005,6 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001359:
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001364.tgz#1e118f0e933ed2b79f8d461796b8ce45398014a0"
   integrity sha512-9O0xzV3wVyX0SlegIQ6knz+okhBB5pE0PC40MNdwcipjwpxoUEHL24uJ+gG42cgklPjfO5ZjZPme9FTSN3QT2Q==
 
-casdoor-js-sdk@^0.2.7:
-  version "0.2.7"
-  resolved "https://registry.npmjs.org/casdoor-js-sdk/-/casdoor-js-sdk-0.2.7.tgz#09342f6715977bc1991222d04dd36c93b5f0872b"
-  integrity sha512-pEI7chd6KWDa7dhBxl3zDY+LagG40bBPoxdPMOZ5OG2gFMTXwRQ4Ka1do0giJsd2YTeAU3u6vwP62YmiQVzgSQ==
-
 case-sensitive-paths-webpack-plugin@^2.4.0:
   version "2.4.0"
   resolved "https://registry.npmjs.org/case-sensitive-paths-webpack-plugin/-/case-sensitive-paths-webpack-plugin-2.4.0.tgz#db64066c6422eed2e08cc14b986ca43796dbc6d4"
@@ -4392,7 +4387,7 @@ expect@^27.5.1:
     jest-matcher-utils "^27.5.1"
     jest-message-util "^27.5.1"
 
-express@^4.17.3, express@^4.18.1:
+express@^4.17.3:
   version "4.18.1"
   resolved "https://registry.npmjs.org/express/-/express-4.18.1.tgz#7797de8b9c72c857b9cd0e14a5eea80666267caf"
   integrity sha512-zZBcOX9TfehHQhtupq57OF8lFZ3UZi08Y97dwFCkD8p9d/d2Y3M+ykKcwaMDEL+4qyUolgBDX6AblpR3fL212Q==

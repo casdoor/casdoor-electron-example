@@ -1,25 +1,17 @@
-import SDK from "casdoor-js-sdk";
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const { shell, ipcRenderer } = window?.electron;
+const { shell, ipcRenderer, receiveCode } = window?.electron;
 
 const serverUrl = "https://door.casdoor.com";
 const appName = "app-casnode";
-const organizationName = "casbin";
 const redirectPath = "/callback";
 const clientId = "014ae4bd048734ca2dea";
 const clientSecret = "f26a4115725867b7bb7b668c81e1f8f7fae1544d";
 
-const redirectUrl = "http://localhost:3000" + redirectPath;
-const sdkConfig = {
-  serverUrl,
-  clientId,
-  appName,
-  organizationName,
-  redirectPath,
-};
-const sdk = new SDK(sdkConfig);
+const redirectUrl = "casdoor://localhost:3000" + redirectPath;
+
+const signinUrl = `${serverUrl}/login/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=read&state=${appName}`;
 
 function App() {
   const [user, setUser] = useState();
@@ -33,21 +25,19 @@ function App() {
   }, []);
 
   async function startAuth() {
-    shell.openExternal(sdk.getSigninUrl());
-    const { code } = await ipcRenderer.invoke("waitCallback", redirectUrl);
-    await ipcRenderer.invoke("setStore", "casdoor_code", code);
+    await shell.openExternal(signinUrl);
 
-    const userInfo = await ipcRenderer.invoke(
-      "getUserInfo",
-      clientId,
-      clientSecret,
-      code
-    );
-    await ipcRenderer.invoke("setStore", "userInfo", userInfo);
+    await receiveCode(async (event, code) => {
+      const userInfo = await ipcRenderer.invoke(
+        "getUserInfo",
+        clientId,
+        clientSecret
+      );
 
-    await ipcRenderer.invoke("focusWin");
+      await ipcRenderer.invoke("focusWin");
 
-    setUser(userInfo);
+      setUser(userInfo);
+    });
   }
 
   async function logout() {
