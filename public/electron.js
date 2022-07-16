@@ -1,10 +1,9 @@
 const path = require("path");
-const express = require("express");
 const url = require("url");
 const axios = require("axios");
 const { app, BrowserWindow, ipcMain } = require("electron");
 const isDev = require("electron-is-dev");
-const Store = require('electron-store');
+const Store = require("electron-store");
 
 const casdoorServiceDomain = "https://door.casdoor.com";
 const authCodeUrl = casdoorServiceDomain + "/api/login/oauth/access_token";
@@ -12,6 +11,7 @@ const getUserInfoUrl = casdoorServiceDomain + "/api/login/oauth/introspect";
 
 const store = new Store();
 Store.initRenderer();
+let mainWindow;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -29,6 +29,8 @@ function createWindow() {
       ? "http://localhost:3000"
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
+
+  mainWindow = win;
 }
 
 app.whenReady().then(createWindow);
@@ -45,67 +47,46 @@ app.on("activate", () => {
   }
 });
 
-ipcMain.handle("waitCallback", async (event, redirectUri, options) => {
-  const { protocol, hostname, port, pathname } = url.parse(redirectUri);
-  if (protocol !== "http:" || hostname !== "localhost") {
-    throw new Error("redirectUri should be an http://localhost url");
-  }
-  return new Promise((resolve, reject) => {
-    const app = express();
-    app.get(pathname, async (req, res) => {
-      resolve(req.query);
-      res.send("<html><body><script>window.close()</script></body></html>");
-      setTimeout(shutdown, 100);
-    });
-    const server = app.listen(port);
-    const shutdown = (reason) => {
-      server.close();
-      if (reason) {
-        reject(new Error(reason));
-      }
-    };
-    if (options && options.timeout) {
-      setTimeout(() => shutdown("timeout"), options.timeout);
-    }
-  });
-});
-
 ipcMain.handle("focusWin", (event, ...args) => {
   app.focus();
 });
 
-ipcMain.handle(
-  "getUserInfo",
-  async (event, clientId, clientSecret, code) => {
-    const { data } = await axios({
-      method: "post",
-      url: authCodeUrl,
-      headers: {
-        "content-type": "application/json",
-      },
-      data: JSON.stringify({
-        grant_type: "authorization_code",
-        client_id: clientId,
-        client_secret: clientSecret,
-        code: code,
-      }),
-    });
-    const resp = await axios({
-      method: "post",
-      url: `${getUserInfoUrl}?token=${data.access_token}&client_id=${clientId}&client_secret=${clientSecret}`,
-      headers: {
-        "content-type": "application/json",
-      },
-      data: JSON.stringify({
-        token: data.access_token,
-        token_type_hint: "access_token",
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-    });
-    return resp.data;
-  }
-);
+async function getUserInfo(clientId, clientSecret, code) {
+  const { data } = await axios({
+    method: "post",
+    url: authCodeUrl,
+    headers: {
+      "content-type": "application/json",
+    },
+    data: JSON.stringify({
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+    }),
+  });
+  const resp = await axios({
+    method: "post",
+    url: `${getUserInfoUrl}?token=${data.access_token}&client_id=${clientId}&client_secret=${clientSecret}`,
+    headers: {
+      "content-type": "application/json",
+    },
+    data: JSON.stringify({
+      token: data.access_token,
+      token_type_hint: "access_token",
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+  return resp.data;
+}
+
+ipcMain.handle("getUserInfo", async (event, clientId, clientSecret) => {
+  const code = store.get("casdoor_code");
+  const userInfo = await getUserInfo(clientId, clientSecret, code);
+  store.set("userInfo", userInfo);
+  return userInfo;
+});
 
 ipcMain.handle("setStore", (event, key, data) => {
   store.set(key, data);
@@ -118,3 +99,46 @@ ipcMain.handle("getStore", (event, key) => {
 ipcMain.handle("deleteStore", (event, key) => {
   store.delete(key);
 });
+
+const protocol = "casdoor";
+
+function setDefaultProtocol() {
+  app.removeAsDefaultProtocolClient(protocol);
+  if (process.env.NODE_ENV === "development" && process.platform === "win32") {
+    app.setAsDefaultProtocolClient(protocol, process.execPath, [
+      path.resolve(process.argv[1]),
+    ]);
+  } else {
+    app.setAsDefaultProtocolClient(protocol);
+  }
+}
+
+setDefaultProtocol();
+
+const ProtocolRegExp = new RegExp(`^${protocol}://`);
+
+async function watchProtocol() {
+  app.on("open-url", (event, openUrl) => {
+    const isProtocol = ProtocolRegExp.test(openUrl);
+    if (isProtocol) {
+      const params = url.parse(openUrl, true).query;
+      if (params && params.code) {
+        store.set("casdoor_code", params.code);
+        mainWindow.webContents.send("receiveCode", params.code);
+      }
+    }
+  });
+  app.on("second-instance", (event, commandLine) => {
+    commandLine.forEach((str) => {
+      if (ProtocolRegExp.test(str)) {
+        const params = url.parse(str, true).query;
+        if (params && params.code) {
+          store.set("casdoor_code", params.code);
+          mainWindow.webContents.send("receiveCode", params.code);
+        }
+      }
+    });
+  });
+}
+
+watchProtocol();
