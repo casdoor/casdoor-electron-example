@@ -104,7 +104,7 @@ const protocol = "casdoor";
 
 function setDefaultProtocol() {
   app.removeAsDefaultProtocolClient(protocol);
-  if (process.env.NODE_ENV === "development" && process.platform === "win32") {
+  if (isDev && process.platform === "win32") {
     app.setAsDefaultProtocolClient(protocol, process.execPath, [
       path.resolve(process.argv[1]),
     ]);
