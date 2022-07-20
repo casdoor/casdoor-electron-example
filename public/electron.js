@@ -12,6 +12,17 @@ const getUserInfoUrl = casdoorServiceDomain + "/api/login/oauth/introspect";
 const store = new Store();
 Store.initRenderer();
 let mainWindow;
+const protocol = "casdoor";
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient(protocol, process.execPath, [
+      path.resolve(process.argv[1]),
+    ]);
+  }
+} else {
+  app.setAsDefaultProtocolClient(protocol);
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -33,7 +44,40 @@ function createWindow() {
   mainWindow = win;
 }
 
-app.whenReady().then(createWindow);
+const gotTheLock = app.requestSingleInstanceLock();
+const ProtocolRegExp = new RegExp(`^${protocol}://`);
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine, workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+      commandLine.forEach((str) => {
+        if (ProtocolRegExp.test(str)) {
+          const params = url.parse(str, true).query;
+          if (params && params.code) {
+            store.set("casdoor_code", params.code);
+            mainWindow.webContents.send("receiveCode", params.code);
+          }
+        }
+      });
+    }
+  });
+  app.whenReady().then(createWindow);
+
+  app.on("open-url", (event, openUrl) => {
+    const isProtocol = ProtocolRegExp.test(openUrl);
+    if (isProtocol) {
+      const params = url.parse(openUrl, true).query;
+      if (params && params.code) {
+        store.set("casdoor_code", params.code);
+        mainWindow.webContents.send("receiveCode", params.code);
+      }
+    }
+  });
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -99,46 +143,3 @@ ipcMain.handle("getStore", (event, key) => {
 ipcMain.handle("deleteStore", (event, key) => {
   store.delete(key);
 });
-
-const protocol = "casdoor";
-
-function setDefaultProtocol() {
-  app.removeAsDefaultProtocolClient(protocol);
-  if (isDev && process.platform === "win32") {
-    app.setAsDefaultProtocolClient(protocol, process.execPath, [
-      path.resolve(process.argv[1]),
-    ]);
-  } else {
-    app.setAsDefaultProtocolClient(protocol);
-  }
-}
-
-setDefaultProtocol();
-
-const ProtocolRegExp = new RegExp(`^${protocol}://`);
-
-async function watchProtocol() {
-  app.on("open-url", (event, openUrl) => {
-    const isProtocol = ProtocolRegExp.test(openUrl);
-    if (isProtocol) {
-      const params = url.parse(openUrl, true).query;
-      if (params && params.code) {
-        store.set("casdoor_code", params.code);
-        mainWindow.webContents.send("receiveCode", params.code);
-      }
-    }
-  });
-  app.on("second-instance", (event, commandLine) => {
-    commandLine.forEach((str) => {
-      if (ProtocolRegExp.test(str)) {
-        const params = url.parse(str, true).query;
-        if (params && params.code) {
-          store.set("casdoor_code", params.code);
-          mainWindow.webContents.send("receiveCode", params.code);
-        }
-      }
-    });
-  });
-}
-
-watchProtocol();
