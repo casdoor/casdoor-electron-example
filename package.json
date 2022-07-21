@@ -1,5 +1,8 @@
 {
   "name": "casdoor-electron-example",
+  "author": "Casdoor",
+  "description": "An example of the electron application using Casdoor to login.",
+  "homepage": "./",
   "version": "0.1.0",
   "private": true,
   "main": "public/electron.js",
@@ -9,6 +12,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "cross-env": "^7.0.3",
+    "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -21,7 +25,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "concurrently -k \"cross-env BROWSER=none npm start\" \"npm:electron\"",
-    "electron": "wait-on tcp:3000 && electron ."
+    "electron": "wait-on tcp:3000 && electron .",
+    "package": "electron-forge package",
+    "make": "react-scripts build && electron-forge make"
   },
   "eslintConfig": {
     "extends": [
@@ -42,9 +48,40 @@
     ]
   },
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.64",
+    "@electron-forge/maker-deb": "^6.0.0-beta.64",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.64",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.64",
+    "@electron-forge/maker-zip": "^6.0.0-beta.64",
     "concurrently": "^7.2.2",
     "electron": "^19.0.8",
-    "electron-is-dev": "^2.0.0",
     "wait-on": "^6.0.1"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "casdoor_electron_example"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }

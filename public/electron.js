@@ -2,7 +2,6 @@ const path = require("path");
 const url = require("url");
 const axios = require("axios");
 const { app, BrowserWindow, ipcMain } = require("electron");
-const isDev = require("electron-is-dev");
 const Store = require("electron-store");
 
 const casdoorServiceDomain = "https://door.casdoor.com";
@@ -31,15 +30,14 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      webSecurity: false,
       preload: path.join(__dirname, "preload.js"),
     },
   });
-
-  win.loadURL(
-    isDev
-      ? "http://localhost:3000"
-      : `file://${path.join(__dirname, "../build/index.html")}`
-  );
+  const isDev = !app.isPackaged;
+  isDev
+    ? win.loadURL("http://localhost:3000")
+    : win.loadFile(path.join(__dirname, "../build/index.html"));
 
   mainWindow = win;
 }

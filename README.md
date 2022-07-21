@@ -24,3 +24,13 @@ In the project directory, you can run:
 ### `npm run dev` or `yarn dev`
 
 Builds the electron app and run this app.
+### `npm run make` or `yarn make`
+ Package and distribute your application.
+ It will create the `out` folder where your package will be located:
+`// Example for macOS
+    out/
+    ├── out/make/zip/darwin/x64/my-electron-app-darwin-x64-1.0.0.zip
+    ├── ...
+    └── out/my-electron-app-darwin-x64/my-electron-app.app/Contents/MacOS/my-electron-ap`
+    
+    
