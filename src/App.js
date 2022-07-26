@@ -11,7 +11,7 @@ const clientSecret = "f26a4115725867b7bb7b668c81e1f8f7fae1544d";
 
 const redirectUrl = "casdoor://localhost:3000" + redirectPath;
 
-const signinUrl = `${serverUrl}/login/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=read&state=${appName}`;
+const signinUrl = `${serverUrl}/login/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=profile&state=${appName}&noRedirect=true`;
 
 function App() {
   const [user, setUser] = useState();
@@ -52,7 +52,7 @@ function App() {
         <button onClick={startAuth}>Login with Casdoor</button>
       ) : (
         <div className="index">
-          <div>{`Username: ${user?.username}`}</div>
+          <div>{`Username: ${user?.name}`}</div>
           <button onClick={logout}>Logout</button>
         </div>
       )}

@@ -6,7 +6,7 @@ const Store = require("electron-store");
 
 const casdoorServiceDomain = "https://door.casdoor.com";
 const authCodeUrl = casdoorServiceDomain + "/api/login/oauth/access_token";
-const getUserInfoUrl = casdoorServiceDomain + "/api/login/oauth/introspect";
+const getUserInfoUrl = casdoorServiceDomain + "/api/userinfo";
 
 const store = new Store();
 Store.initRenderer();
@@ -108,17 +108,8 @@ async function getUserInfo(clientId, clientSecret, code) {
     }),
   });
   const resp = await axios({
-    method: "post",
-    url: `${getUserInfoUrl}?token=${data.access_token}&client_id=${clientId}&client_secret=${clientSecret}`,
-    headers: {
-      "content-type": "application/json",
-    },
-    data: JSON.stringify({
-      token: data.access_token,
-      token_type_hint: "access_token",
-      client_id: clientId,
-      client_secret: clientSecret,
-    }),
+    method: "get",
+    url: `${getUserInfoUrl}?accessToken=${data.access_token}`,
   });
   return resp.data;
 }
