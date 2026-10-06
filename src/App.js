@@ -1,59 +1,49 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const { shell, ipcRenderer, receiveCode } = window?.electron;
-
-const serverUrl = "https://door.casdoor.com";
-const appName = "app-casnode";
-const redirectPath = "/callback";
-const clientId = "014ae4bd048734ca2dea";
-const clientSecret = "f26a4115725867b7bb7b668c81e1f8f7fae1544d";
-
-const redirectUrl = "casdoor://localhost:3000" + redirectPath;
-
-const signinUrl = `${serverUrl}/login/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=profile&state=${appName}&noRedirect=true`;
+// the API exposed by public/preload.js, the sign-in runs in the main process (public/electron.js)
+const casdoor = window.casdoor;
 
 function App() {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const getUserInfo = async () => {
-      const userInfo = await ipcRenderer.invoke("getStore", "userInfo");
-      setUser(userInfo);
-    }
-    getUserInfo();
+    casdoor.getUser().then(setUser);
+
+    const removeUserHandler = casdoor.onUser((signedInUser) => {
+      setError("");
+      setUser(signedInUser);
+    });
+    const removeErrorHandler = casdoor.onError((message) => {
+      setError(`Failed to sign in: ${message}`);
+    });
+    return () => {
+      removeUserHandler();
+      removeErrorHandler();
+    };
   }, []);
 
-  async function startAuth() {
-    await shell.openExternal(signinUrl);
-
-    await receiveCode(async (event, code) => {
-      const userInfo = await ipcRenderer.invoke(
-        "getUserInfo",
-        clientId,
-        clientSecret
-      );
-
-      await ipcRenderer.invoke("focusWin");
-
-      setUser(userInfo);
-    });
+  async function signin() {
+    setError("");
+    // opens the Casdoor sign-in page in the browser, the user arrives through onUser
+    await casdoor.signin();
   }
 
-  async function logout() {
-    await ipcRenderer.invoke("deleteStore", "userInfo");
-    await ipcRenderer.invoke("deleteStore", "casdoor_code");
-    setUser(undefined);
+  async function signout() {
+    await casdoor.signout();
+    setUser(null);
   }
 
   return (
     <div className="App">
+      {error && <div className="error">{error}</div>}
       {!user ? (
-        <button onClick={startAuth}>Login with Casdoor</button>
+        <button onClick={signin}>Login with Casdoor</button>
       ) : (
         <div className="index">
-          <div>{`Username: ${user?.name}`}</div>
-          <button onClick={logout}>Logout</button>
+          <div>{`Username: ${user.name}`}</div>
+          <button onClick={signout}>Logout</button>
         </div>
       )}
     </div>

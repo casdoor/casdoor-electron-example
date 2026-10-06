@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Check the main process scripts
+        run: node --check public/electron.js && node --check public/preload.js
+
+      - run: yarn build
+
+      - name: Package the app
+        run: yarn electron-forge package

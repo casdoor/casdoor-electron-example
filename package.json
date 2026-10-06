@@ -7,32 +7,22 @@
   "private": true,
   "main": "public/electron.js",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^0.27.2",
-    "cross-env": "^7.0.3",
-    "electron-squirrel-startup": "^1.0.0",
-    "electron-store": "^8.0.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "electron-squirrel-startup": "^1.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "concurrently -k \"cross-env BROWSER=none npm start\" \"npm:electron\"",
-    "electron": "wait-on tcp:3000 && electron .",
-    "package": "electron-forge package",
+    "dev": "concurrently -k \"cross-env BROWSER=none react-scripts start\" \"wait-on tcp:3000 && cross-env ELECTRON_START_URL=http://localhost:3000 electron .\"",
+    "app": "react-scripts build && electron .",
+    "package": "react-scripts build && electron-forge package",
     "make": "react-scripts build && electron-forge make"
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
@@ -48,18 +38,28 @@
     ]
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.64",
-    "@electron-forge/maker-deb": "^6.0.0-beta.64",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.64",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.64",
-    "@electron-forge/maker-zip": "^6.0.0-beta.64",
-    "concurrently": "^7.2.2",
-    "electron": "^19.0.8",
-    "wait-on": "^6.0.1"
+    "@electron-forge/cli": "^7.11.2",
+    "@electron-forge/maker-deb": "^7.11.2",
+    "@electron-forge/maker-rpm": "^7.11.2",
+    "@electron-forge/maker-squirrel": "^7.11.2",
+    "@electron-forge/maker-zip": "^7.11.2",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^44.5.1",
+    "wait-on": "^8.0.5"
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "protocols": [
+          {
+            "name": "Casdoor",
+            "schemes": [
+              "casdoor"
+            ]
+          }
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
@@ -75,11 +75,19 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "mimeType": [
+              "x-scheme-handler/casdoor"
+            ]
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "mimeType": [
+              "x-scheme-handler/casdoor"
+            ]
+          }
         }
       ]
     }
